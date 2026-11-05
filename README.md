@@ -1,5 +1,7 @@
 # Android Ad Cleaner, India fork
 
+> **Want the full cleanup?** Use [Clean Your Phone](https://github.com/kaidhar/cleanyourphone). It includes this notification cleaning, and also disables ad apps and blocks ad servers. This fork stays up for anyone who only wants the notification part.
+
 Turn off the promotional notifications on your Android phone and keep the useful ones. Flipkart's offers go, Flipkart's order updates stay. No root, nothing uninstalled, and you can undo it.
 
 This is a fork of [rddmwmddr/android-ad-cleaner](https://github.com/rddmwmddr/android-ad-cleaner), which was built for phones sold in China and matches Chinese menu text. This fork adds English rules and an English command line, so it works on phones with English menus. The careful part, switching one setting at a time and checking the result, is the original author's work. [The original README is here](README.zh-CN.md).
