@@ -1,5 +1,7 @@
 # AGENTS.md —— 给 AI 智能体的操作规范
 
+> **English menus (India fork):** on a phone with English menus, use `tool/promo.py` and follow README.md. The recipes and `run.py` below match Chinese text and won't find their way around, except `recipes/vivo-V2231`. The hard rules below still apply: never agree to anything for the user, never change a setting without saying so first, and turn protective switches like "Limit ad tracking" on, not off.
+
 读者：能在用户电脑上执行命令的 AI 智能体（WorkBuddy、Claude Code、Codex、Trae、Cursor 等）。
 任务：通过 adb 关掉用户安卓手机里的广告、热搜、资讯推荐和营销推送。
 沟通语言：跟用户的语言一致。

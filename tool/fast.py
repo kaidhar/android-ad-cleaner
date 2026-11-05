@@ -32,11 +32,13 @@ from row import (SWITCH_ROW_DEPTH, bounds, control, dedupe, disabled_at, is_swit
 # 显式 re-export：机型脚本从 fast 取这个判据（与 bounds 同一处引用）。
 from row import icon_hit as icon_hit
 
-DISMISS = ("以后再说", "暂不更新", "暂不", "取消", "我知道了", "跳过", "禁止", "不再提示", "不同意")
+DISMISS = ("以后再说", "暂不更新", "暂不", "取消", "我知道了", "跳过", "禁止", "不再提示", "不同意",
+           "Not now", "Later", "Cancel", "Skip", "No thanks", "Don't allow", "Deny", "Disagree")
 # 应用内更新弹窗的标题（主题商店 17.22.0beta2 是「检测到新版本」，#286）。它通常把更新说明放进可滚动容器，
 # 只按标题认，不按按钮认：单个「取消」在正常设置面板里也有。
 UPDATE_TITLE = re.compile(r"检测到新版本|发现新版本|版本更新提示")
-CONFIRM = ("确定", "关闭", "仍要关闭", "确认关闭", "确认", "继续关闭", "关闭推荐", "仍然关闭")
+CONFIRM = ("确定", "关闭", "仍要关闭", "确认关闭", "确认", "继续关闭", "关闭推荐", "仍然关闭",
+           "OK", "Turn off", "Confirm")
 # 点击后认确认框总共等多久：vivo 商店「个性化推荐」页的弹窗要 0.6 秒才进树，而一次读屏
 # 也要上百毫秒，1 秒是「能等到慢弹窗」与「没弹窗的页面不多付太多」之间的取值（#555）。
 # 前 0.2 秒先不给读屏：弹窗刚弹出时按钮还在动，点在半路上不生效。
@@ -77,9 +79,11 @@ def switch_row(node, parents, depth=SWITCH_ROW_DEPTH):
 
 
 # 「防止/限制/阻止广告跟踪」「关闭个性化推荐」这类开关是反着的：打开才是保护。不能当广告开关关掉。
-NEG_PREFIX = re.compile(r"^(防止|限制|阻止|禁止|拒绝|不允许|屏蔽|关闭|停用|不接收|不显示|不推送|停止)")
-AD_WORDS = re.compile(r"广告|跟踪|追踪|推荐|个性化|营销|资讯|热搜|热点|定向|画像")   # 不含「推送」：「关闭推送」会连订单通知一起关
-TRACK_WORDS = re.compile(r"广告|跟踪|追踪")
+NEG_PREFIX = re.compile(r"^(?:防止|限制|阻止|禁止|拒绝|不允许|屏蔽|关闭|停用|不接收|不显示|不推送|停止"
+                        r"|(?:limit|prevent|block|stop|disable|deny|reject|opt.?out|turn off|do not|don.?t|never)(?![a-z]))", re.I)
+AD_WORDS = re.compile(r"广告|跟踪|追踪|推荐|个性化|营销|资讯|热搜|热点|定向|画像"
+                      r"|(?<![a-z])(?:ads?|advert\w*|tracking|track|personali[sz]\w*|recommend\w*|marketing|promot\w*)(?![a-z])", re.I)   # 不含「推送」：「关闭推送」会连订单通知一起关
+TRACK_WORDS = re.compile(r"广告|跟踪|追踪|(?<![a-z])(?:ads?|tracking)(?![a-z])", re.I)
 # 判据词后面只能是结尾或分隔符：底栏读作「我的，有新消息」算命中，「我的应用」不算
 EXPECT_TAIL = re.compile(r"[，,、/·\s（(：:]")
 
@@ -379,6 +383,11 @@ class Phone:
             l, t, r, b = bounds(ctrl)
             # 卡片自己报状态时以卡片为准；缺这个属性才读内层开关，别把缺属性当成「关」
             checked = n.get("checked") if n.get("checked") is not None else ctrl.get("checked")
+            # vivo (V2231, Funtouch OS 15) wraps the real switch in an outer Switch that always reports false.
+            # A card saying "on" is believed, as above. A card saying "off" with a switch inside saying "on" is that wrapper.
+            if checked != "true" and "Switch" in cls and any(
+                    c is not n and "Switch" in c.get("class", "") and c.get("checked") == "true" for c in n.iter("node")):
+                checked = "true"
             out.append((title_of(n, parent, self.on_screen, self.H), checked == "true", (l, t, r, b)))
         return [(title, on, ((l + r) // 2, (t + b) // 2)) for title, on, (l, t, r, b) in dedupe(out)]
 
